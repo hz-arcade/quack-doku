@@ -1,0 +1,31 @@
+{
+  "v": 1,
+  "month": "2026-10",
+  "days": {
+    "2026-10-07": {"n":8,"r":"ccaaaafdccaaaaddbbaaaaadbbaaedddbbhheeeehhheeeeehhgeeeeehhggeeee","s":"61470253","id":"f61eb0d2","d":32.4,"t":4,"w":0},
+    "2026-10-08": {"n":8,"r":"hhdddgggbhdddggebbbddgeebbeegggebbbeeeeebbbaaaecbbbaaaecbbbbfeee","s":"02516374","id":"a83f4f69","d":41.6,"t":4,"w":0},
+    "2026-10-09": {"n":9,"r":"iiiiibbbciiiiiiibchiificcbcffifiicccfffficccceffdgccggeffdgggggeefdgggageeddggaaa","s":"580427316","id":"66722f41","d":38.8,"t":4,"w":0},
+    "2026-10-10": {"n":9,"r":"hhhddeeeeghhceeeffgghccceffagccccefiacccciifiaaccciiiiaiiiciiibiiiiiibbbiiibbbbbb","s":"426173058","id":"23c86160","d":42.7,"t":4,"w":0},
+    "2026-10-11": {"n":10,"r":"ffffgggeebfffgggggeejfffdgggeejfccdfggeejffccfffffjjfffffhhfjaaafffhhhjaiiiiihhhjaiiiiiihhaaaiiihhhh","s":"9648315720","id":"3b4701b0","d":62.8,"t":5,"w":1},
+    "2026-10-12": {"n":7,"r":"feebaaaffebbbagfbbbbdggggbddggggbbdggcggddccccddd","s":"2614053","id":"067cd01f","d":35.3,"t":4,"w":0},
+    "2026-10-13": {"n":7,"r":"bbbbgggbbbbeggbbdbeegdddeeegdaeefefaaeffefaccffff","s":"6351402","id":"e775c5c4","d":31.6,"t":3,"w":0},
+    "2026-10-14": {"n":8,"r":"ggghhheeggbbeeeagggeeeeafgfffeaaffffcecaffccccccddccccccdddccccc","s":"53617042","id":"c7f3e9c3","d":42.2,"t":4,"w":0},
+    "2026-10-15": {"n":8,"r":"bbbbacffbebbccffbebccccfeedcgcffedddgggfddgggfffdggdggfhddddggff","s":"46250371","id":"ad3deeb1","d":30.3,"t":4,"w":0},
+    "2026-10-16": {"n":9,"r":"bbiiaaaaabbbiacaafbbbeecfffbbeeeffffbeegggfffbbeeegghhhbeeeghhhheeehhhhdhhhhhhhdd","s":"635740281","id":"cc49b21c","d":43.6,"t":4,"w":0},
+    "2026-10-17": {"n":9,"r":"bbbbiiiiibbbbiffiibbibbiiiibciiiiiiibcciddgigccciedgggeeeiedghheeeeeggggeeeaaaggg","s":"257146803","id":"8743135d","d":42.4,"t":4,"w":0},
+    "2026-10-18": {"n":10,"r":"ffffjgggggfffjjggggefffbggcceeffffcgcceafcccccccaafhhcciccaahhccciidddhhhciiddhdhhhchiiihdhhhhhhhhhd","s":"4638092751","id":"e82f8822","d":45.7,"t":4,"w":0},
+    "2026-10-19": {"n":7,"r":"aeeeeeecceceeeccccefecbbcfffdbbbfggdbbfffgddbbbbg","s":"0425361","id":"849c8738","d":34.7,"t":4,"w":0},
+    "2026-10-20": {"n":7,"r":"ddggbbbdddgggbddddfbbddddbbbdcceebbcccaebbcaaaeee","s":"2046135","id":"1ec4c754","d":37.7,"t":3,"w":0},
+    "2026-10-21": {"n":8,"r":"hhhcccbbhgdcdfbbhgdddfbbggggddbbgggeeebbgggeeaabgggeeaabggeeaabb","s":"35047162","id":"2c573b0f","d":37.8,"t":4,"w":0},
+    "2026-10-22": {"n":8,"r":"aaggccccagggcgccaadggggcaddggggbadgggfbbaagbbbbbaahhbeeeaaabbeee","s":"40315726","id":"494f7456","d":31.2,"t":3,"w":0},
+    "2026-10-23": {"n":9,"r":"ebbbbbaddebbbbaaccebbbbccccgbbbbccccgbibcccccgbibggcccggibggcchgggggfchhggggffffh","s":"750362814","id":"dfc2e2ac","d":40,"t":4,"w":0},
+    "2026-10-24": {"n":9,"r":"hhhhhhaddhcchggaadhcchggdddhcciigdidhhciiiiidhhbffidddhhbbdddddhhbbdeeddhhhhddedd","s":"074153826","id":"4065e4db","d":53.1,"t":5,"w":1},
+    "2026-10-25": {"n":10,"r":"jcccccccacjcccchccccjfccbhhccejfffbbgccejjjfbbggcijbbbbbgbiijjjjbbbbiijjjdddbbiijjjdbbbiiijjdddbiiii","s":"8159364072","id":"5bb69a79","d":46,"t":4,"w":0},
+    "2026-10-26": {"n":7,"r":"dddddbbdddddbfggdddbfeggggffcggggffcccggaaccggaaa","s":"5260314","id":"221160f1","d":26.1,"t":4,"w":0},
+    "2026-10-27": {"n":7,"r":"gfffeeedfffeeedfffeeedfdfbbbddddaabdddcacbdddcccb","s":"0526413","id":"d58d201b","d":28.5,"t":4,"w":0},
+    "2026-10-28": {"n":8,"r":"eeebaaaaddbbaaaadddbhaacddhhhaacdfhhccccffhhccccffffccccffffggcc","s":"13640725","id":"5bcad516","d":43.2,"t":4,"w":0},
+    "2026-10-29": {"n":8,"r":"aaeeeeeeaaaeeeeeaaaaceeeaaaaccddggggbbddggggbdddghhffdddghhffddd","s":"62475031","id":"fa137e37","d":37.2,"t":4,"w":0},
+    "2026-10-30": {"n":9,"r":"bbbbddhhhbffbbdchhfffcccchhfffffcceeffgfffffeffgggeeeegggggaeieagaaaaaeeaaaaaaeee","s":"408513726","id":"d2142460","d":44.7,"t":4,"w":0},
+    "2026-10-31": {"n":9,"r":"dddffaaacdddfiiaccddiiiiaceddiidiieedddddeeeeddhheeeeedbhhheeeedbbbgeeeeddbggeeee","s":"637502814","id":"6008901f","d":41.3,"t":4,"w":0}
+  }
+}
