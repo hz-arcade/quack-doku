@@ -15,8 +15,10 @@
   --on-accent: #5a3a00;
   --danger: #e8506e;
   --danger-2: #b8344f;
-  --wall: #2d4558;
-  --thin: rgba(45, 69, 88, 0.16);
+  /* Region walls stay soft: the colours carry the regions, the lines only confirm them. */
+  --wall: rgba(35, 56, 74, 0.34);
+  --frame: rgba(35, 56, 74, 0.22);
+  --thin: rgba(255, 255, 255, 0.5);
   --x: #4a6072;
   --ax: rgba(74, 96, 114, 0.32);
   --hint: #e8506e;
@@ -53,8 +55,9 @@
     --btn-shadow: #0d1d2a;
     --primary: #3aa7e4;
     --primary-2: #1e6f9e;
-    --wall: #08131c;
-    --thin: rgba(255, 255, 255, 0.1);
+    --wall: rgba(5, 15, 25, 0.42);
+    --frame: rgba(5, 15, 25, 0.5);
+    --thin: rgba(255, 255, 255, 0.07);
     --x: #eaf3fa;
     --ax: rgba(234, 243, 250, 0.34);
     --dim: rgba(5, 15, 25, 0.5);
@@ -86,8 +89,9 @@
   --btn-shadow: #0d1d2a;
   --primary: #3aa7e4;
   --primary-2: #1e6f9e;
-  --wall: #08131c;
-  --thin: rgba(255, 255, 255, 0.1);
+  --wall: rgba(5, 15, 25, 0.42);
+  --frame: rgba(5, 15, 25, 0.5);
+  --thin: rgba(255, 255, 255, 0.07);
   --x: #eaf3fa;
   --ax: rgba(234, 243, 250, 0.34);
   --dim: rgba(5, 15, 25, 0.5);
@@ -676,7 +680,7 @@ body[data-view='daily'] #topbar .lang-btn {
   border-radius: 14px;
   overflow: hidden;
   background: var(--card-solid);
-  box-shadow: 0 0 0 3px var(--wall), var(--shadow);
+  box-shadow: 0 0 0 2px var(--frame), var(--shadow);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -729,7 +733,7 @@ body[data-view='daily'] #topbar .lang-btn {
 
 .walls .thick {
   stroke: var(--wall);
-  stroke-width: 2.6px;
+  stroke-width: 2px;
 }
 
 .walls .thin {
