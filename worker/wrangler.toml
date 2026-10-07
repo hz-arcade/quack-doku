@@ -1,0 +1,21 @@
+name = "quack-doku-scores"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+workers_dev = true
+
+[vars]
+# Comma-separated list of origins allowed to read and submit times.
+# The game lives at arcade.hz.ax only.
+ALLOWED_ORIGINS = "https://arcade.hz.ax"
+# Local development only (`npm run scores:dev` turns it on).
+ALLOW_LOCALHOST = "false"
+
+[durable_objects]
+bindings = [{ name = "TIMES", class_name = "DailyBoard" }]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DailyBoard"]
+
+[observability]
+enabled = true

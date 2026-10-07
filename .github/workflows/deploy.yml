@@ -1,0 +1,124 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      has_cloudflare: ${{ steps.cf.outputs.present }}
+    steps:
+      - id: cf
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
+
+  # The leaderboard API: a Cloudflare Worker + one SQLite Durable Object (free tier).
+  # Skipped until CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are set as repo secrets;
+  # the game then ships with the leaderboard hidden.
+  worker:
+    needs: check
+    if: needs.check.outputs.has_cloudflare == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # The validation rules the Worker enforces are unit tested; do not ship them red.
+      - run: npm test
+      - run: npx tsc -p worker/tsconfig.json
+      # A Worker needs a workers.dev subdomain for its public address; register one if the
+      # account has none yet (one-time, idempotent).
+      - name: Ensure workers.dev subdomain
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WANTED: ${{ github.repository_owner }}
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/subdomain"
+          current=$(curl -s -H "Authorization: Bearer $CF_API_TOKEN" "$api" | jq -r '.result.subdomain // empty')
+          if [ -n "$current" ]; then echo "subdomain already registered: $current.workers.dev"; exit 0; fi
+          name=$(echo "$WANTED" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9\n' '-')
+          echo "registering $name.workers.dev"
+          curl -sf -X PUT -H "Authorization: Bearer $CF_API_TOKEN" -H "content-type: application/json" \
+            "$api" -d "{\"subdomain\":\"$name\"}" | jq .
+      - id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy
+      # Optional: SCORES_ADMIN_TOKEN turns on DELETE /daily/:id for removing a bad entry.
+      - name: Admin token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ADMIN_TOKEN: ${{ secrets.SCORES_ADMIN_TOKEN }}
+        run: |
+          if [ -z "$ADMIN_TOKEN" ]; then echo "SCORES_ADMIN_TOKEN not set: the delete route stays off"; exit 0; fi
+          printf '%s' "$ADMIN_TOKEN" | npx wrangler secret put ADMIN_TOKEN --config worker/wrangler.toml
+      - name: Health check
+        env:
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          if [ -z "$URL" ]; then echo "::warning::wrangler reported no deployment URL; the site will build without a leaderboard unless the SCORES_URL variable is set"; exit 0; fi
+          for i in 1 2 3 4 5 6; do
+            if curl -sf "$URL/healthz" | grep -q '"ok":true'; then echo "healthy: $URL"; exit 0; fi
+            sleep 5
+          done
+          echo "::warning::$URL/healthz did not answer yet"
+
+  build:
+    needs: [check, worker]
+    if: always() && needs.check.result == 'success' && (needs.worker.result == 'success' || needs.worker.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+        env:
+          # Project site lives at https://<user>.github.io/<repo>/ (or the Pages custom domain).
+          VITE_BASE: /${{ github.event.repository.name }}/
+          # Empty when the worker job was skipped: the leaderboard UI stays hidden.
+          # The SCORES_URL repo variable overrides nothing but fills in, e.g. for a custom domain.
+          VITE_SCORES_URL: ${{ needs.worker.outputs.url || vars.SCORES_URL }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    # Explicit condition: a skipped worker job upstream must not skip the site deploy.
+    if: always() && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
