@@ -254,7 +254,48 @@ async function solveByMouse(page) {
   await ctx.close();
 }
 
-// ---- 3. Levels, languages, dark mode, offline ----
+// ---- 3. Auto-cross follows the ducks ----
+{
+  console.log('auto-cross');
+  const { ctx, page, errors } = await open({ width: 390, height: 844 }, { touch: true, dpr: 2 });
+  await page.goto(base + '?test#/level/2');
+  await waitBoard(page, 5);
+  await page.click('#settingsBtn');
+  await page.click('label[for="setAutoX"]');
+  await page.click('#settingsDone');
+  check('auto-cross setting turns on', await page.evaluate(() => window.__game.progress.settings.autoX));
+  const sol = await page.evaluate(() => window.__game.solution());
+  const ax = () => page.locator('.cell.ax').count();
+  const ducks = async () => (await state(page)).ducks.length;
+  await doubleTapTouch(page, sol[0]);
+  await page.waitForTimeout(350);
+  const shown = await ax();
+  check('a duck crosses out what it rules out', shown > 0, String(shown));
+  const c = await center(page, sol[0]);
+  await page.touchscreen.tap(c.x, c.y);
+  await page.waitForTimeout(400);
+  check('tapping the duck away clears its crosses', (await ducks()) === 0 && (await ax()) === 0, String(await ax()));
+  await doubleTapTouch(page, sol[0]);
+  await page.waitForTimeout(350);
+  await doubleTapTouch(page, sol[0]);
+  await page.waitForTimeout(350);
+  check('double-tapping the duck away clears its crosses', (await ducks()) === 0 && (await ax()) === 0, String(await ax()));
+  await doubleTapTouch(page, sol[0]);
+  await page.waitForTimeout(350);
+  await doubleTapTouch(page, sol[2]);
+  await page.waitForTimeout(350);
+  const both = await ax();
+  await page.click('#undoBtn');
+  await page.waitForTimeout(200);
+  check('undo removes only the last duck’s crosses', (await ducks()) === 1 && (await ax()) === shown && both > shown, `${both} -> ${await ax()}`);
+  await page.click('#undoBtn');
+  await page.waitForTimeout(200);
+  check('undoing the first duck clears the rest', (await ducks()) === 0 && (await ax()) === 0);
+  check('no console errors (auto-cross)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+
+// ---- 4. Levels, languages, dark mode, offline ----
 {
   console.log('levels and languages');
   const { ctx, page, errors } = await open({ width: 412, height: 915 }, { touch: true, dpr: 2 });

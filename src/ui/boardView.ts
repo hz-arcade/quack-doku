@@ -29,6 +29,8 @@ export class BoardView {
   private colours: number[] = [];
   private cells: HTMLDivElement[] = [];
   private ducks = new Map<number, SVGSVGElement>();
+  /** Automatic crosses as last drawn, so a change anywhere on the board gets redrawn. */
+  private shownDerived = new Uint8Array(0);
   private cursor = -1;
   private highlight: BoardHighlight | null = null;
 
@@ -46,6 +48,7 @@ export class BoardView {
     this.geo = geo;
     this.colours = colours;
     this.ducks.clear();
+    this.shownDerived = new Uint8Array(geo.size);
     this.cursor = -1;
     this.highlight = null;
     const n = geo.n;
@@ -73,12 +76,18 @@ export class BoardView {
     this.el.replaceChildren(grid);
   }
 
-  /** Redraw marks. `cells` limits the work to cells that changed (null: all). */
+  /**
+   * Redraw marks. `cells` limits the work to cells whose marks changed (null: all); cells
+   * whose automatic cross appeared or disappeared (a duck placed or removed elsewhere) are
+   * always redrawn too.
+   */
   render(marks: Uint8Array, derived: Uint8Array, cells: readonly number[] | null): void {
     const geo = this.geo;
     if (!geo) return;
-    const list = cells ?? [...Array(geo.size).keys()];
+    const list = new Set(cells ?? geo.region.keys());
+    for (let i = 0; i < geo.size; i++) if (derived[i] !== this.shownDerived[i]) list.add(i);
     for (const i of list) this.renderCell(i, marks[i]!, derived[i]!);
+    this.shownDerived = derived.slice();
     this.renderConflicts(marks);
   }
 
