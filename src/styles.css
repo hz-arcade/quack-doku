@@ -15,10 +15,6 @@
   --on-accent: #5a3a00;
   --danger: #e8506e;
   --danger-2: #b8344f;
-  /* Region walls stay soft: the colours carry the regions, the lines only confirm them. */
-  --wall: rgba(35, 56, 74, 0.34);
-  --frame: rgba(35, 56, 74, 0.22);
-  --thin: rgba(255, 255, 255, 0.5);
   --x: #4a6072;
   --ax: rgba(74, 96, 114, 0.32);
   --hint: #e8506e;
@@ -55,9 +51,6 @@
     --btn-shadow: #0d1d2a;
     --primary: #3aa7e4;
     --primary-2: #1e6f9e;
-    --wall: rgba(5, 15, 25, 0.42);
-    --frame: rgba(5, 15, 25, 0.5);
-    --thin: rgba(255, 255, 255, 0.07);
     --x: #eaf3fa;
     --ax: rgba(234, 243, 250, 0.34);
     --dim: rgba(5, 15, 25, 0.5);
@@ -89,9 +82,6 @@
   --btn-shadow: #0d1d2a;
   --primary: #3aa7e4;
   --primary-2: #1e6f9e;
-  --wall: rgba(5, 15, 25, 0.42);
-  --frame: rgba(5, 15, 25, 0.5);
-  --thin: rgba(255, 255, 255, 0.07);
   --x: #eaf3fa;
   --ax: rgba(234, 243, 250, 0.34);
   --dim: rgba(5, 15, 25, 0.5);
@@ -677,16 +667,16 @@ body[data-view='daily'] #topbar .lang-btn {
 
 .board {
   position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--card-solid);
-  box-shadow: 0 0 0 2px var(--frame), var(--shadow);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   outline: none;
   container-type: size;
+  /* Tiles with see-through gaps. Half a gap of padding keeps every cell centred in its
+     1/n slice of the board, so pointer hit-testing stays a plain division. */
+  --cell: calc(100cqw / var(--n));
+  --gap: clamp(2px, calc(var(--cell) * 0.09), 6px);
 }
 
 .board-wrap > .board {
@@ -704,6 +694,8 @@ body[data-view='daily'] #topbar .lang-btn {
   display: grid;
   grid-template-columns: repeat(var(--n), 1fr);
   grid-template-rows: repeat(var(--n), 1fr);
+  gap: var(--gap);
+  padding: calc(var(--gap) / 2);
   width: 100%;
   height: 100%;
 }
@@ -715,34 +707,12 @@ body[data-view='daily'] #topbar .lang-btn {
 .cell {
   position: relative;
   background-color: var(--c);
+  border-radius: calc(var(--cell) * 0.16);
 }
 
-.walls {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.walls path {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-  stroke-linecap: round;
-}
-
-.walls .thick {
-  stroke: var(--wall);
-  stroke-width: 2px;
-}
-
-.walls .thin {
-  stroke: var(--thin);
-  stroke-width: 1px;
-}
-
-.walls .frame {
-  display: none;
+.cell::before,
+.cell::after {
+  border-radius: inherit;
 }
 
 /* X marks: two rounded bars. */
@@ -886,8 +856,7 @@ body[data-view='daily'] #topbar .lang-btn {
   box-shadow: inset 0 0 0 3px var(--primary);
 }
 
-.board.covered .cells,
-.board.covered .walls {
+.board.covered .cells {
   filter: blur(12px) saturate(0.6);
 }
 
@@ -1209,7 +1178,7 @@ body[data-view='daily'] #topbar .lang-btn {
   gap: 12px;
   padding: 10px 4px;
   cursor: pointer;
-  border-bottom: 1px solid var(--thin);
+  border-bottom: 1px solid rgba(127, 127, 127, 0.2);
 }
 
 .toggle-text {

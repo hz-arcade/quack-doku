@@ -4,8 +4,6 @@ import { t } from '../i18n';
 import { duckSvg, setDuckVariant, type DuckVariant } from './duckArt.ts';
 import { make } from './dom.ts';
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
 /** What a hint wants to show on the board. */
 export interface BoardHighlight {
   /** Cells of the units the hint talks about (the rest of the board dims). */
@@ -22,8 +20,8 @@ export interface BoardHighlight {
 }
 
 /**
- * The board: a CSS grid of cells with one SVG overlay drawing the region walls. Cells are
- * updated in place; only the cells that changed are touched.
+ * The board: a CSS grid of rounded tiles with see-through gaps between them; regions show
+ * by colour alone. Cells are updated in place; only the cells that changed are touched.
  */
 export class BoardView {
   readonly el: HTMLDivElement;
@@ -72,40 +70,7 @@ export class BoardView {
       }
       grid.appendChild(row);
     }
-    this.el.replaceChildren(grid, this.walls(geo));
-  }
-
-  /** Region walls (thick), grid lines (thin) and the rounded frame, in cell units. */
-  private walls(geo: Geo): SVGSVGElement {
-    const n = geo.n;
-    const thick: string[] = [];
-    const thin: string[] = [];
-    for (let r = 0; r < n; r++) {
-      for (let c = 0; c < n; c++) {
-        const g = geo.region[r * n + c];
-        if (c < n - 1) (geo.region[r * n + c + 1] !== g ? thick : thin).push(`M${c + 1} ${r}V${r + 1}`);
-        if (r < n - 1) (geo.region[(r + 1) * n + c] !== g ? thick : thin).push(`M${c} ${r + 1}H${c + 1}`);
-      }
-    }
-    const svg = document.createElementNS(SVG_NS, 'svg');
-    svg.setAttribute('class', 'walls');
-    svg.setAttribute('viewBox', `0 0 ${n} ${n}`);
-    svg.setAttribute('preserveAspectRatio', 'none');
-    svg.setAttribute('aria-hidden', 'true');
-    const path = (d: string, cls: string) => {
-      const p = document.createElementNS(SVG_NS, 'path');
-      p.setAttribute('d', d);
-      p.setAttribute('class', cls);
-      return p;
-    };
-    const frame = document.createElementNS(SVG_NS, 'rect');
-    frame.setAttribute('class', 'frame');
-    frame.setAttribute('x', '0');
-    frame.setAttribute('y', '0');
-    frame.setAttribute('width', String(n));
-    frame.setAttribute('height', String(n));
-    svg.append(path(thin.join(''), 'thin'), path(thick.join(''), 'thick'), frame);
-    return svg;
+    this.el.replaceChildren(grid);
   }
 
   /** Redraw marks. `cells` limits the work to cells that changed (null: all). */
