@@ -295,7 +295,37 @@ async function solveByMouse(page) {
   await ctx.close();
 }
 
-// ---- 4. Levels, languages, dark mode, offline ----
+// ---- 4. Colour squares in hints ----
+{
+  console.log('hint colour squares');
+  const { ctx, page, errors } = await open({ width: 390, height: 844 }, { touch: true, dpr: 2 });
+  await page.goto(base + '?test#/level/1');
+  await waitBoard(page, 5);
+  let found = null;
+  for (let i = 0; i < 25 && !found; i++) {
+    await page.click('#hintBtn');
+    await page.waitForTimeout(120);
+    found = await page.evaluate(() => {
+      const sw = document.querySelector('#hintText .swatch');
+      if (!sw) return null;
+      const colour = getComputedStyle(sw).backgroundColor;
+      const focus = [...document.querySelectorAll('.cell.hl-focus')].map((c) => getComputedStyle(c).backgroundColor);
+      return { colour, matches: focus.includes(colour), text: document.getElementById('hintText').textContent };
+    });
+    if (!found) {
+      if ((await page.locator('#hintShow').count()) === 0) break;
+      await page.click('#hintShow');
+    }
+  }
+  check('a colour hint shows a colour square', !!found);
+  check('the square has the region’s colour', !!found?.matches, JSON.stringify(found));
+  check('the square stays out of the text', !!found && !/[\uE000-\uF8FF]/.test(found.text));
+  await page.screenshot({ path: `${OUT}/qd-hint-swatch.png` });
+  check('no console errors (colour squares)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+
+// ---- 5. Levels, languages, dark mode, offline ----
 {
   console.log('levels and languages');
   const { ctx, page, errors } = await open({ width: 412, height: 915 }, { touch: true, dpr: 2 });

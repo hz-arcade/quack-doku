@@ -5,7 +5,10 @@ import { list, plural, t, type StringKey } from '../i18n';
 import type { BoardHighlight } from './boardView.ts';
 
 export interface HintView {
+  /** Plain text (screen readers, tests). */
   text: string;
+  /** The same text with a swatch marker after every colour name; see hintParts(). */
+  rich: string;
   highlight: BoardHighlight | null;
   /** Whether "Show me" has something to do. */
   canApply: boolean;
@@ -17,8 +20,32 @@ function kindOf(geo: Geo, u: number): number {
   return Math.floor(u / geo.n);
 }
 
+/** Private-use characters around a palette index mark where a colour swatch goes. */
+const SW_OPEN = String.fromCharCode(0xe000);
+const SW_CLOSE = String.fromCharCode(0xe001);
+const SWATCH = new RegExp(`${SW_OPEN}(\\d+)${SW_CLOSE}`, 'g');
+
+/** "pebble", followed by a swatch marker for the same palette colour. */
 function colourName(geo: Geo, colours: readonly number[], u: number): string {
-  return t(`color.${colours[u % geo.n]!}` as StringKey);
+  const c = colours[u % geo.n]!;
+  return `${t(`color.${c}` as StringKey)}${SW_OPEN}${c}${SW_CLOSE}`;
+}
+
+/** Hint text split into plain runs and colour swatches (palette indices). */
+export function hintParts(rich: string): (string | { colour: number })[] {
+  const out: (string | { colour: number })[] = [];
+  let last = 0;
+  for (const m of rich.matchAll(SWATCH)) {
+    if (m.index > last) out.push(rich.slice(last, m.index));
+    out.push({ colour: Number(m[1]) });
+    last = m.index + m[0].length;
+  }
+  if (last < rich.length) out.push(rich.slice(last));
+  return out;
+}
+
+function plain(rich: string): string {
+  return rich.replace(SWATCH, '');
 }
 
 /** Parameters naming a unit: {row}, {col} or {color}. */
@@ -43,7 +70,7 @@ function numbers(geo: Geo, units: readonly number[]): string {
   return list(units.map((u) => String((u % geo.n) + 1)));
 }
 
-function describeStep(geo: Geo, colours: readonly number[], d: Deduction): HintView {
+function describeStep(geo: Geo, colours: readonly number[], d: Deduction): Omit<HintView, 'rich'> {
   switch (d.tech) {
     case 'clear':
       return { text: t('hint.clear'), highlight: { focus: [d.duck, ...d.elim], elim: d.elim }, canApply: true };
@@ -92,11 +119,16 @@ function describeStep(geo: Geo, colours: readonly number[], d: Deduction): HintV
   }
 }
 
-export function describeHint(h: Hint, geo: Geo, colours: readonly number[]): HintView {
+function describe(h: Hint, geo: Geo, colours: readonly number[]): Omit<HintView, 'rich'> {
   if (h.kind === 'done') return { text: t('hint.done'), highlight: null, canApply: false };
   if (h.kind === 'mistakes') {
     if (!h.cells.length) return { text: plural('hint.mistakes', h.count), highlight: null, canApply: false };
     return { text: t('hint.mistakes.shown'), highlight: { wrong: h.cells }, canApply: true };
   }
   return describeStep(geo, colours, h.step.d);
+}
+
+export function describeHint(h: Hint, geo: Geo, colours: readonly number[]): HintView {
+  const v = describe(h, geo, colours);
+  return { ...v, rich: v.text, text: plain(v.text) };
 }

@@ -14,7 +14,7 @@ import { dailyAvailable, getDaily, getLevel } from '../packs/packs.ts';
 import { BoardView } from './boardView.ts';
 import { button, el, make } from './dom.ts';
 import { duckSvg } from './duckArt.ts';
-import { describeHint, type HintView } from './hintText.ts';
+import { describeHint, hintParts, type HintView } from './hintText.ts';
 import { icon, type IconName } from './icons.ts';
 import { BoardInput } from './input.ts';
 import type { DailySolve, LeaderboardPort, LeaderboardUi } from './leaderboardUi.ts';
@@ -621,8 +621,19 @@ export class App {
     head.appendChild(icon('bulb'));
     head.appendChild(make('strong', '', t('hint.title')));
     panel.appendChild(head);
-    const text = make('p', 'hint-text', hint.view.text);
+    const text = make('p', 'hint-text');
     text.id = 'hintText';
+    // A colour name is followed by a little square of that colour.
+    for (const part of hintParts(hint.view.rich)) {
+      if (typeof part === 'string') {
+        text.append(part);
+        continue;
+      }
+      const sw = make('span', 'swatch');
+      sw.style.setProperty('--sw', `var(--r${part.colour})`);
+      sw.setAttribute('aria-hidden', 'true');
+      text.append(sw);
+    }
     panel.appendChild(text);
     const row = make('div', 'row');
     if (hint.view.canApply) {

@@ -6,7 +6,7 @@ import { parseRegions, parseSolution, type PackPuzzle } from '../src/engine/puzz
 import { detectLang, LANGS, list, matchLang, plural, setLang, t, TABLES } from '../src/i18n';
 import { en } from '../src/i18n/en';
 import { createClient } from '../src/net/leaderboard.ts';
-import { describeHint } from '../src/ui/hintText.ts';
+import { describeHint, hintParts } from '../src/ui/hintText.ts';
 import { assignColours, colourDistance, PALETTE_DARK, PALETTE_LIGHT, regionNeighbours } from '../src/ui/palette.ts';
 
 const keys = Object.keys(en).sort();
@@ -80,6 +80,7 @@ describe('i18n', () => {
 describe('hint text', () => {
   it('reads cleanly in every language for every step of many solves', () => {
     const seen = new Set<string>();
+    let swatches = 0;
     for (const lang of LANGS) {
       setLang(lang, false);
       for (const p of puzzles.filter((_, i) => i % 9 === 0)) {
@@ -91,7 +92,17 @@ describe('hint text', () => {
           const h = buildHint({ geo, solution: sol, marks, autoX: false });
           const v = describeHint(h, geo, colours);
           expect(v.text.length).toBeGreaterThan(10);
-          expect(v.text, `${lang}: ${v.text}`).not.toMatch(/[{}]|undefined|NaN/);
+          expect(v.text, `${lang}: ${v.text}`).not.toMatch(/[{}]|undefined|NaN|\p{Co}/u);
+          // Every colour square sits right after its own colour's name and is a colour on this board.
+          const parts = hintParts(v.rich);
+          expect(parts.filter((x) => typeof x === 'string').join('')).toBe(v.text);
+          parts.forEach((x, k) => {
+            if (typeof x === 'string') return;
+            swatches++;
+            expect(colours).toContain(x.colour);
+            const before = parts[k - 1];
+            expect(typeof before === 'string' && before.endsWith(t(`color.${x.colour}` as 'color.0')), `${lang}: ${v.text}`).toBe(true);
+          });
           if (h.kind !== 'step') break;
           seen.add(h.step.d.tech);
           const d = h.step.d;
@@ -101,6 +112,7 @@ describe('hint text', () => {
       }
     }
     expect([...seen].sort()).toEqual(['block', 'clear', 'confine', 'pigeon', 'single', 'whatif']);
+    expect(swatches).toBeGreaterThan(100);
   });
 });
 
